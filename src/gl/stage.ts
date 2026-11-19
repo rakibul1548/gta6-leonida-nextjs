@@ -8,7 +8,6 @@ export type View = {
   render: (r: THREE.WebGLRenderer, t: number, dt: number, w: number, h: number) => void
   dispose?: () => void
   enabled?: () => boolean
-  visible?: boolean
 }
 
 let renderer: THREE.WebGLRenderer | null = null
@@ -67,7 +66,6 @@ function loop(t: number, dt: number) {
   const vh = window.innerHeight
   let any = false
   for (const v of views) {
-    if (v.visible === false) continue
     if (v.enabled && !v.enabled()) continue
     const r = v.el.getBoundingClientRect()
     if (r.bottom <= 0 || r.top >= vh || r.width === 0) continue
@@ -111,17 +109,8 @@ function loop(t: number, dt: number) {
 
 export function addView(v: View) {
   getRenderer()
-  v.visible = true
-  const io = new IntersectionObserver(
-    ([entry]) => {
-      v.visible = entry.isIntersecting
-    },
-    { rootMargin: '80px 0px' },
-  )
-  io.observe(v.el)
   views.add(v)
   return () => {
-    io.disconnect()
     views.delete(v)
     v.dispose?.()
   }

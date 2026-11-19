@@ -16,8 +16,11 @@ export function startReveals() {
   const scan = (root: ParentNode) => root.querySelectorAll('[data-reveal]:not([data-in])').forEach((el) => io.observe(el))
   scan(document)
   const t = window.setTimeout(() => scan(document), 600)
+  const mo = typeof MutationObserver !== 'undefined' ? new MutationObserver(() => scan(document)) : null
+  mo?.observe(document.body, { childList: true, subtree: true })
   return () => {
     window.clearTimeout(t)
+    mo?.disconnect()
     io.disconnect()
   }
 }

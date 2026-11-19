@@ -484,13 +484,15 @@ export function createTrip(el: HTMLElement, opts: TripOpts): Trip {
       bill.position.set(side * 12.5, 5.4, zc - 12)
       bill.rotation.y = -side * 0.5
       content.add(bill)
-      loadTex(artUrl(reg.postcard, 'landscape', q === 'high' ? 1920 : 1280)).then((t) => {
-        if (disposed || myGen !== gen) return t.dispose()
-        textures.push(t)
-        pcMat.map = t
-        pcMat.color.set(0xffffff)
-        pcMat.needsUpdate = true
-      })
+      loadTex(artUrl(reg.postcard, 'landscape', q === 'high' ? 1920 : 1280))
+        .then((t) => {
+          if (disposed || myGen !== gen) return t.dispose()
+          textures.push(t)
+          pcMat.map = t
+          pcMat.color.set(0xffffff)
+          pcMat.needsUpdate = true
+        })
+        .catch(() => {})
 
       const ids = shotsByTag(reg.shots).map((s) => s.id)
       const pickN = [0, 1, 2, 3].map((k) => ids[(k * 2 + i) % ids.length])
@@ -516,13 +518,15 @@ export function createTrip(el: HTMLElement, opts: TripOpts): Trip {
         g.rotation.y = sp.ry
         g.userData.bob = { y: sp.y, s: Math.random() * 6 }
         content.add(g)
-        loadTex(shotUrl(id, shotW)).then((t) => {
-          if (disposed || myGen !== gen) return t.dispose()
-          textures.push(t)
-          mat.map = t
-          mat.color.set(0xffffff)
-          mat.needsUpdate = true
-        })
+        loadTex(shotUrl(id, shotW))
+          .then((t) => {
+            if (disposed || myGen !== gen) return t.dispose()
+            textures.push(t)
+            mat.map = t
+            mat.color.set(0xffffff)
+            mat.needsUpdate = true
+          })
+          .catch(() => {})
       })
 
       const N = q === 'high' ? 420 : 200

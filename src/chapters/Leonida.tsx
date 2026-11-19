@@ -32,48 +32,49 @@ function RoadTrip() {
   modeRef.current = mode
   const [active, setActive] = useState(false)
   const barRef = useRef<HTMLSpanElement>(null)
-  const [near, setNear] = useState(false)
 
   useEffect(() => {
-    const el = section.current
-    if (!el) return
-    const io = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), { rootMargin: '150% 0px 150% 0px' })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!host.current || !near) return
+    if (!host.current) return
     let alive = true
     let t: Trip | null = null
     import('../gl/trip').then(({ createTrip }) => {
-    if (!alive || !host.current) return
-    t = createTrip(host.current, {
-      route: routeRef.current,
-      onStop: (i) => {
-        setStop(i)
-        sfx.blip()
-      },
-      onPick: (kind, id) => {
-        sfx.select()
-        const r = routeRef.current.find((x) => x.postcard === id || shotsByTag(x.shots).some((s) => s.id === id))
-        if (kind === 'postcard') set({ lightbox: { ids: [`art:${id}`, ...(r ? shotsByTag(r.shots).map((s) => s.id) : [])], index: 0 } })
-        else {
-          const ids = r ? shotsByTag(r.shots).map((s) => s.id) : [id]
-          set({ lightbox: { ids, index: Math.max(0, ids.indexOf(id)) } })
-        }
-      },
-      onLookUp: () => addSecret('lookup'),
-    })
-    trip.current = t
-    t.setMode(modeRef.current)
+      if (!alive || !host.current) return
+      t = createTrip(host.current, {
+        route: routeRef.current,
+        onStop: (i) => {
+          setStop(i)
+          sfx.blip()
+        },
+        onPick: (kind, id) => {
+          sfx.select()
+          const r = routeRef.current.find((x) => x.postcard === id || shotsByTag(x.shots).some((s) => s.id === id))
+          if (kind === 'postcard') set({ lightbox: { ids: [`art:${id}`, ...(r ? shotsByTag(r.shots).map((s) => s.id) : [])], index: 0 } })
+          else {
+            const ids = r ? shotsByTag(r.shots).map((s) => s.id) : [id]
+            set({ lightbox: { ids, index: Math.max(0, ids.indexOf(id)) } })
+          }
+        },
+        onLookUp: () => addSecret('lookup'),
+      })
+      trip.current = t
+      t.setMode(modeRef.current)
+      const el = section.current
+      if (el) {
+        const r = el.getBoundingClientRect()
+        const vh = window.innerHeight
+        const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)))
+        t.setProgress(p)
+        if (barRef.current) barRef.current.style.transform = `scaleX(${p.toFixed(4)})`
+        const on = r.top <= 1 && r.bottom >= vh - 1
+        setActive((a) => (a === on ? a : on))
+      }
     })
     return () => {
       alive = false
       t?.dispose()
       trip.current = null
     }
-  }, [near])
+  }, [])
 
   useEffect(() => {
     trip.current?.setRoute(route)
@@ -83,30 +84,20 @@ function RoadTrip() {
     trip.current?.setMode(mode)
   }, [mode])
 
-  const [inView, setInView] = useState(false)
-
   useEffect(() => {
-    const el = section.current
-    if (!el) return
-    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: '100px 0px' })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!inView) return
     return onTick(() => {
       const el = section.current
       if (!el) return
       const r = el.getBoundingClientRect()
       const vh = window.innerHeight
+      if (r.bottom < -100 || r.top > vh + 100) return
       const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)))
       trip.current?.setProgress(p)
       if (barRef.current) barRef.current.style.transform = `scaleX(${p.toFixed(4)})`
       const on = r.top <= 1 && r.bottom >= vh - 1
       setActive((a) => (a === on ? a : on))
     })
-  }, [inView])
+  }, [])
 
   const stopScroll = (i: number) => {
     const el = section.current
@@ -219,6 +210,13 @@ function Postcards() {
   const route = routeFor(lead)
   const found = useGame((s) => s.secrets.includes('lookup'))
   const [sky, setSky] = useState(found)
+
+  useEffect(() => {
+    const els = document.querySelectorAll('#leonida [data-reveal]')
+    els.forEach((el) => {
+      ;(el as HTMLElement).dataset.in = '1'
+    })
+  }, [lead])
   return (
     <section id="leonida" className="chapter postcards" aria-label="Only in Leonida">
       <div className="wrap">
