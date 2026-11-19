@@ -19,12 +19,13 @@ type PicProps = {
 }
 
 function Picture({ base, v, sizes = '100vw', alt, className, style, imgStyle, eager, priority, fit = 'cover', position = 'center', maxW, onLoad }: PicProps) {
-  const [loaded, setLoaded] = useState(false)
+  const [loaded, setLoaded] = useState(() => !!eager || !!priority)
   const ref = useRef<HTMLImageElement>(null)
   const maxAllowed = maxW ?? 2560
   const widths = v.widths.filter((w) => w <= maxAllowed)
   const ws = widths.length ? widths : [v.widths[0]]
   const set = (ext: string) => ws.map((w) => `${base}-${w}.${ext} ${w}w`).join(', ')
+  const fallbackIx = maxAllowed <= 640 ? 0 : Math.min(1, ws.length - 1)
   useEffect(() => {
     if (ref.current?.complete) setLoaded(true)
   }, [])
@@ -35,7 +36,7 @@ function Picture({ base, v, sizes = '100vw', alt, className, style, imgStyle, ea
     >
       <img
         ref={ref}
-        src={`${base}-${ws[Math.min(1, ws.length - 1)]}.webp`}
+        src={`${base}-${ws[fallbackIx]}.webp`}
         srcSet={set('webp')}
         sizes={sizes}
         alt={alt}
@@ -58,7 +59,7 @@ function Picture({ base, v, sizes = '100vw', alt, className, style, imgStyle, ea
           setLoaded(true)
           onLoad?.()
         }}
-        style={{ width: '100%', height: '100%', objectFit: fit, objectPosition: position, opacity: loaded ? 1 : 0, transition: 'opacity .7s var(--ease)', ...imgStyle }}
+        style={{ width: '100%', height: '100%', objectFit: fit, objectPosition: position, opacity: loaded ? 1 : 0.85, transition: 'opacity .3s var(--ease)', ...imgStyle }}
       />
     </picture>
   )
@@ -87,21 +88,21 @@ export function Clip({ k, active, className, style, need = 720, fit = 'cover', p
   const [src, setSrc] = useState<string | null>(null)
   const reduced = useGame((s) => s.reduced)
   const slowmo = useGame((s) => s.slowmo)
-  const [visible, setVisible] = useState(() => !!active || !!always)
+  const [intersecting, setIntersecting] = useState(() => !!always)
 
   useEffect(() => {
-    if (active || always) {
-      setVisible(true)
+    if (always) {
+      setIntersecting(true)
       return
     }
     const el = ref.current
     if (!el) return
-    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: '200px' })
+    const io = new IntersectionObserver(([e]) => setIntersecting(e.isIntersecting), { rootMargin: '300px' })
     io.observe(el)
     return () => io.disconnect()
-  }, [active, always])
+  }, [always])
 
-  const shouldPlay = (active || always || visible) && !reduced
+  const shouldPlay = (always || (active && intersecting)) && !reduced
 
   useEffect(() => {
     if (shouldPlay && !src) setSrc(clipUrl(k, need))
@@ -127,7 +128,7 @@ export function Clip({ k, active, className, style, need = 720, fit = 'cover', p
       muted
       loop
       playsInline
-      preload="none"
+      preload={shouldPlay ? 'auto' : 'none'}
       aria-hidden="true"
       disablePictureInPicture
     />

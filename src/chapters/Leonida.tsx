@@ -32,9 +32,26 @@ function RoadTrip() {
   modeRef.current = mode
   const [active, setActive] = useState(false)
   const barRef = useRef<HTMLSpanElement>(null)
+  const [near, setNear] = useState(false)
 
   useEffect(() => {
-    if (!host.current) return
+    const el = section.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setNear(true)
+          io.disconnect()
+        }
+      },
+      { rootMargin: '800px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!near || !host.current) return
     let alive = true
     let t: Trip | null = null
     import('../gl/trip').then(({ createTrip }) => {
@@ -74,7 +91,7 @@ function RoadTrip() {
       t?.dispose()
       trip.current = null
     }
-  }, [])
+  }, [near])
 
   useEffect(() => {
     trip.current?.setRoute(route)

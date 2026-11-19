@@ -38,6 +38,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Anton&family=Inter+Tight:wght@400;500;600;700&display=swap"
         />
         <link rel="preload" as="image" href="/media/vi-logo.webp" fetchPriority="high" />
+        <link rel="preload" as="image" href="/media/a/jason-and-lucia-lock-and-load-landscape-1280.webp" fetchPriority="high" />
         <style
           dangerouslySetInnerHTML={{
             __html: `

@@ -38,12 +38,13 @@ export function Boot({ onEnter }: { onEnter: (sound: boolean) => void }) {
   }, [])
 
   useEffect(() => {
+    const heroScene = HERO_SCENES[1]
+    const heroVariant = phone ? heroScene.phone : 'landscape'
     const urls = [
       LOGO,
-      ...HERO_SCENES.flatMap((s) => {
-        const v = phone ? s.phone : 'landscape'
-        return [artUrl(s.key, v, heroNeed(phone)), `/media/d/${s.key}-${v}.webp`]
-      }),
+      artUrl(heroScene.key, heroVariant, Math.min(1920, heroNeed(phone))),
+      `/media/d/${heroScene.key}-${heroVariant}.webp`,
+      ...PANELS.map((p) => artUrl(p.k, phone ? 'portrait' : 'landscape', 1080)),
     ]
     setTotal(urls.length)
     let n = 0
@@ -64,7 +65,7 @@ export function Boot({ onEnter }: { onEnter: (sound: boolean) => void }) {
     const target = loaded / total
     const step = () => {
       setProgress((p) => {
-        const next = p + (target - p) * 0.12 + 0.002
+        const next = p + (target - p) * 0.2 + 0.005
         return Math.min(target, next)
       })
       raf = requestAnimationFrame(step)

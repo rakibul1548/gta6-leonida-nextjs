@@ -87,18 +87,23 @@ export function createHero(el: HTMLElement, phone: boolean): HeroGL {
   const mat = new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: frag, uniforms, depthTest: false, depthWrite: false })
   scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat))
 
-  const tex: { t: THREE.Texture; d: THREE.Texture; a: number }[] = []
+  const tex: ({ t: THREE.Texture; d: THREE.Texture; a: number } | undefined)[] = []
   const need = heroNeed(phone)
-  const ready = Promise.all(
-    HERO_SCENES.map(async (s) => {
-      const variant = phone ? s.phone : 'landscape'
-      const [t, d] = await Promise.all([loadTex(artUrl(s.key, variant, need)), loadData(`/media/d/${s.key}-${variant}.webp`)])
-      const img = t.image as HTMLImageElement
-      return { t, d, a: img.width / img.height }
-    }),
-  ).then((list) => {
-    tex.push(...list)
+
+  async function loadScene(i: number) {
+    const s = HERO_SCENES[i]
+    const variant = phone ? s.phone : 'landscape'
+    const [t, d] = await Promise.all([loadTex(artUrl(s.key, variant, need)), loadData(`/media/d/${s.key}-${variant}.webp`)])
+    const img = t.image as HTMLImageElement
+    tex[i] = { t, d, a: img.width / img.height }
+    return tex[i]!
+  }
+
+  // Load initial scene (Golden hour) first so Hero is ready and interactive immediately!
+  const ready = loadScene(1).then(() => {
     apply(cur, cur)
+    // Preload remaining scenes in background without blocking initial display
+    Promise.all([loadScene(0), loadScene(2)]).catch(() => {})
   })
 
   let cur = 1
@@ -110,13 +115,15 @@ export function createHero(el: HTMLElement, phone: boolean): HeroGL {
   let gyro = false
 
   function apply(a: number, b: number) {
-    if (!tex.length) return
-    uniforms.tA.value = tex[a].t
-    uniforms.dA.value = tex[a].d
-    uniforms.aA.value = tex[a].a
-    uniforms.tB.value = tex[b].t
-    uniforms.dB.value = tex[b].d
-    uniforms.aB.value = tex[b].a
+    const itemA = tex[a] ?? tex[1]
+    const itemB = tex[b] ?? tex[1]
+    if (!itemA || !itemB) return
+    uniforms.tA.value = itemA.t
+    uniforms.dA.value = itemA.d
+    uniforms.aA.value = itemA.a
+    uniforms.tB.value = itemB.t
+    uniforms.dB.value = itemB.d
+    uniforms.aB.value = itemB.a
   }
 
   const onMove = (e: PointerEvent) => {
@@ -171,8 +178,8 @@ export function createHero(el: HTMLElement, phone: boolean): HeroGL {
       window.removeEventListener('deviceorientation', onOrient)
       mat.dispose()
       tex.forEach((x) => {
-        x.t.dispose()
-        x.d.dispose()
+        x?.t?.dispose()
+        x?.d?.dispose()
       })
     },
   }
