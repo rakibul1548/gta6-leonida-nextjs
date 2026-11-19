@@ -78,11 +78,9 @@ export function lockScroll(lock: boolean) {
   if (lock) {
     document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
-    document.body.style.touchAction = 'none'
   } else {
     document.documentElement.style.overflow = ''
     document.body.style.overflow = ''
-    document.body.style.touchAction = ''
   }
 }
 

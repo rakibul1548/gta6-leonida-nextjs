@@ -59,7 +59,7 @@ export function PauseMenu() {
   useTrap(!!tab, ref)
   if (!tab) return null
   return (
-    <div className="menu" role="dialog" aria-modal="true" aria-label="Pause menu" ref={ref}>
+    <div className="menu" role="dialog" aria-modal="true" aria-label="Pause menu" ref={ref} data-lenis-prevent>
       <div className="menu__bg" />
       <div className="menu__head">
         <div className="menu__title">
@@ -86,7 +86,7 @@ export function PauseMenu() {
           Resume <kbd>Esc</kbd>
         </button>
       </div>
-      <div className="menu__body" key={tab}>
+      <div className="menu__body" key={tab} data-lenis-prevent>
         {tab === 'map' && <MapTab />}
         {tab === 'brief' && <BriefTab />}
         {tab === 'stats' && <StatsTab />}
@@ -383,6 +383,7 @@ export function Lightbox() {
       aria-modal="true"
       aria-label="Image viewer"
       ref={ref}
+      data-lenis-prevent
       onTouchStart={(e) => (touch.current = e.touches[0].clientX)}
       onTouchEnd={(e) => {
         if (touch.current == null) return
@@ -425,7 +426,7 @@ export function ShareModal() {
   useTrap(!!kind, ref)
   if (!kind) return null
   return (
-    <div className="modal" role="dialog" aria-modal="true" aria-label={kind === 'card' ? 'Your card' : 'Make your cover'} ref={ref}>
+    <div className="modal" role="dialog" aria-modal="true" aria-label={kind === 'card' ? 'Your card' : 'Make your cover'} ref={ref} data-lenis-prevent>
       <div className="modal__bg" onClick={() => set({ share: null })} />
       {kind === 'card' ? <CardMaker /> : <CoverMaker />}
     </div>
@@ -561,14 +562,37 @@ function CoverMaker() {
 export function Dossier() {
   const id = useGame((s) => s.dossier) as CastId | null
   const ref = useRef<HTMLDivElement>(null)
+  const sheetRef = useRef<HTMLElement>(null)
   useTrap(!!id, ref)
+
+  useEffect(() => {
+    const el = sheetRef.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      e.stopPropagation()
+    }
+    el.addEventListener('wheel', onWheel, { passive: true })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [id])
+
   if (!id) return null
   const c = castById[id]
   const ids = shots.filter((s) => s.tag === c.shots).map((s) => s.id)
   return (
-    <div className="dossier" role="dialog" aria-modal="true" aria-label={`${c.first} ${c.last}`} ref={ref}>
+    <div className="dossier" role="dialog" aria-modal="true" aria-label={`${c.first} ${c.last}`} ref={ref} data-lenis-prevent data-lenis-prevent-wheel data-lenis-prevent-touch>
       <div className="modal__bg" onClick={() => set({ dossier: null })} />
-      <aside className="dossier__sheet" style={{ ['--c' as string]: c.color }}>
+      <aside
+        className="dossier__sheet"
+        ref={sheetRef}
+        data-lenis-prevent
+        data-lenis-prevent-wheel
+        data-lenis-prevent-touch
+        onWheel={(e) => {
+          e.stopPropagation()
+          e.nativeEvent?.stopImmediatePropagation?.()
+        }}
+        style={{ ['--c' as string]: c.color }}
+      >
         <button className="dossier__close" onClick={() => set({ dossier: null })} aria-label="Close dossier" data-cursor="CLOSE">
           ✕
         </button>
