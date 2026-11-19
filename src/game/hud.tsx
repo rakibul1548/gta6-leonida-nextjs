@@ -63,8 +63,12 @@ export function HUD() {
   useEffect(() => {
     let last = ''
     let lastP = -1
-    return onTick(() => {
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+    let max = typeof window !== 'undefined' ? Math.max(1, document.documentElement.scrollHeight - window.innerHeight) : 1
+    const updateMax = () => {
+      max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+    }
+    window.addEventListener('resize', updateMax, { passive: true })
+    const off = onTick(() => {
       const p = Math.min(1, Math.max(0, scrollY() / max))
       const st = get()
       const txt = st.chapter === 'hero' && st.heroTime ? st.heroTime : clockText(clockMinutes(p))
@@ -80,6 +84,10 @@ export function HUD() {
         setScrolled((v) => (v === sc ? v : sc))
       }
     })
+    return () => {
+      off()
+      window.removeEventListener('resize', updateMax)
+    }
   }, [])
 
   const cur = chapters.find((c) => c.id === chapter) ?? chapters[0]
@@ -210,8 +218,10 @@ export function Reticle() {
       const el = document.elementFromPoint(tx, ty)
       lastEl = el
       const c = el?.closest?.('[data-cursor]') as HTMLElement | null
-      setLabel(c?.dataset.cursor || '')
-      setHot(!!el?.closest?.('a, button, [role=button], input, [data-cursor]'))
+      const nextLabel = c?.dataset.cursor || ''
+      const nextHot = !!el?.closest?.('a, button, [role=button], input, [data-cursor]')
+      setLabel((prev) => (prev !== nextLabel ? nextLabel : prev))
+      setHot((prev) => (prev !== nextHot ? nextHot : prev))
     }
     const id = window.setInterval(onOver, 250)
     const off = onTick(() => {

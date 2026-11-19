@@ -83,7 +83,18 @@ function RoadTrip() {
     trip.current?.setMode(mode)
   }, [mode])
 
+  const [inView, setInView] = useState(false)
+
   useEffect(() => {
+    const el = section.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: '100px 0px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!inView) return
     return onTick(() => {
       const el = section.current
       if (!el) return
@@ -95,7 +106,7 @@ function RoadTrip() {
       const on = r.top <= 1 && r.bottom >= vh - 1
       setActive((a) => (a === on ? a : on))
     })
-  }, [])
+  }, [inView])
 
   const stopScroll = (i: number) => {
     const el = section.current

@@ -34,14 +34,26 @@ function Strip({ frames, dir, tilt }: { frames: Frame[]; dir: 1 | -1; tilt: numb
   const drag = useRef<{ x: number; o: number; moved: boolean } | null>(null)
   const off = useRef(0)
 
+  const [inView, setInView] = useState(false)
+
   useEffect(() => {
-    if (reduced) return
-    return onTick((_, dt) => {
-      const el = track.current
-      if (!el) return
-      const r = el.getBoundingClientRect()
-      if (r.bottom < -100 || r.top > window.innerHeight + 100) return
-      const half = el.scrollWidth / 2
+    const el = track.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: '200px 0px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (reduced || !inView) return
+    const el = track.current
+    if (!el) return
+    let half = el.scrollWidth / 2 || 1200
+    const onResize = () => {
+      if (el) half = el.scrollWidth / 2 || 1200
+    }
+    window.addEventListener('resize', onResize, { passive: true })
+    const offFn = onTick((_, dt) => {
       if (!drag.current) {
         const v = Math.min(60, Math.abs(getVelocity()))
         const slow = hoverRef.current != null ? 0.15 : 1
@@ -51,7 +63,11 @@ function Strip({ frames, dir, tilt }: { frames: Frame[]; dir: 1 | -1; tilt: numb
       if (off.current > 0) off.current -= half
       el.style.transform = `translate3d(${off.current.toFixed(1)}px,0,0)`
     })
-  }, [dir, reduced])
+    return () => {
+      offFn()
+      window.removeEventListener('resize', onResize)
+    }
+  }, [dir, reduced, inView])
 
   const list = [...frames, ...frames]
   const open = (f: Frame) => {

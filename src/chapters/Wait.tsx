@@ -10,24 +10,40 @@ import { sfx } from '../audio/engine'
 function Row({ text, dir, outline, speed }: { text: string; dir: 1 | -1; outline?: boolean; speed: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const reduced = useGame((s) => s.reduced)
+  const [inView, setInView] = useState(false)
+
   useEffect(() => {
-    if (reduced) return
+    const el = ref.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: '250px 0px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (reduced || !inView) return
+    const el = ref.current
+    if (!el) return
     let x = 0
     let skew = 0
-    return onTick((_, dt) => {
-      const el = ref.current
-      if (!el) return
-      const r = el.getBoundingClientRect()
-      if (r.bottom < -200 || r.top > window.innerHeight + 200) return
+    let half = el.scrollWidth / 2 || 1000
+    const onResize = () => {
+      if (el) half = el.scrollWidth / 2 || 1000
+    }
+    window.addEventListener('resize', onResize, { passive: true })
+    const off = onTick((_, dt) => {
       const v = getVelocity()
-      const half = el.scrollWidth / 2
       x += dir * (speed + Math.min(40, Math.abs(v)) * 14) * dt
       if (x < -half) x += half
       if (x > 0) x -= half
       skew += (Math.max(-12, Math.min(12, v * 0.35)) - skew) * 0.12
       el.style.transform = `translate3d(${x.toFixed(1)}px,0,0) skewX(${(-skew * dir).toFixed(2)}deg)`
     })
-  }, [dir, speed, reduced])
+    return () => {
+      off()
+      window.removeEventListener('resize', onResize)
+    }
+  }, [dir, speed, reduced, inView])
   const items = Array.from({ length: 8 }, (_, i) => (
     <span key={i} className={`marquee__item ${outline ? 'is-outline' : ''}`}>
       {text}

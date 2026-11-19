@@ -3,6 +3,7 @@ import { addView, loadData, loadTex } from './stage'
 import { artUrl } from '../content/media'
 import { get } from '../game/store'
 import { HERO_SCENES, heroNeed } from './quality'
+import { scrollY } from '../game/scroll'
 
 
 const vert = `
@@ -140,8 +141,7 @@ export function createHero(el: HTMLElement, phone: boolean): HeroGL {
       uniforms.uPtr.value.copy(ptr)
       uniforms.uTime.value = t
       uniforms.uRes.value.set(w, h)
-      const rect = el.getBoundingClientRect()
-      uniforms.uScroll.value = Math.max(0, Math.min(1, -rect.top / Math.max(1, rect.height)))
+      uniforms.uScroll.value = Math.max(0, Math.min(1, scrollY() / Math.max(1, h)))
       if (mixV < 1) {
         mixV = Math.min(1, mixV + dt / 1.1)
         leak = Math.sin(mixV * Math.PI)

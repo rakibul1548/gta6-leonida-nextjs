@@ -8,6 +8,7 @@ export type View = {
   render: (r: THREE.WebGLRenderer, t: number, dt: number, w: number, h: number) => void
   dispose?: () => void
   enabled?: () => boolean
+  visible?: boolean
 }
 
 let renderer: THREE.WebGLRenderer | null = null
@@ -24,13 +25,13 @@ export function getRenderer() {
   canvas = document.createElement('canvas')
   canvas.className = 'gl-stage'
   canvas.setAttribute('aria-hidden', 'true')
-  Object.assign(canvas.style, { position: 'fixed', left: '0', top: '0', zIndex: '0', pointerEvents: 'none' })
+  Object.assign(canvas.style, { position: 'fixed', left: '0', top: '0', zIndex: '0', pointerEvents: 'none', transform: 'translateZ(0)', willChange: 'transform' })
   canvas.addEventListener('webglcontextlost', (e) => {
     e.preventDefault()
     set({ glLost: true })
   })
   document.body.prepend(canvas)
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' })
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' })
   renderer.setClearColor(0x000000, 0)
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.autoClear = false
@@ -44,7 +45,7 @@ export function getRenderer() {
 
 function dprFor() {
   const q = get().quality
-  return Math.min(window.devicePixelRatio || 1, q === 'high' ? 2 : 1.25)
+  return Math.min(window.devicePixelRatio || 1, q === 'high' ? 1.5 : 1)
 }
 
 function resize() {
@@ -66,6 +67,7 @@ function loop(t: number, dt: number) {
   const vh = window.innerHeight
   let any = false
   for (const v of views) {
+    if (v.visible === false) continue
     if (v.enabled && !v.enabled()) continue
     const r = v.el.getBoundingClientRect()
     if (r.bottom <= 0 || r.top >= vh || r.width === 0) continue
@@ -109,8 +111,17 @@ function loop(t: number, dt: number) {
 
 export function addView(v: View) {
   getRenderer()
+  v.visible = true
+  const io = new IntersectionObserver(
+    ([entry]) => {
+      v.visible = entry.isIntersecting
+    },
+    { rootMargin: '80px 0px' },
+  )
+  io.observe(v.el)
   views.add(v)
   return () => {
+    io.disconnect()
     views.delete(v)
     v.dispose?.()
   }

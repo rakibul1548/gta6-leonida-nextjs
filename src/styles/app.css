@@ -27,6 +27,8 @@ main { position: relative; }
 }
 .field:focus { border-color: var(--accent); }
 
+.gl-stage { transform: translateZ(0); will-change: transform; }
+
 .boot { position: fixed; inset: 0; z-index: 100; background: var(--night); overflow: hidden; }
 .boot__panels { position: absolute; inset: -4% -8%; display: flex; gap: 10px; transform: skewX(-9deg); }
 .boot__panel { flex: 1; position: relative; overflow: hidden; background: #111; }

@@ -12,7 +12,7 @@ export function initScroll(smooth: boolean) {
   if (lenis) lenis.destroy()
   lenis = null
   if (smooth) {
-    lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 1, smoothWheel: true, syncTouch: false })
+    lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true, syncTouch: false })
     lenis.on('scroll', (l: Lenis) => {
       velocity = l.velocity
       ScrollTrigger.update()
@@ -35,7 +35,7 @@ let started = false
 export function startTicker() {
   if (started) return
   started = true
-  gsap.ticker.lagSmoothing(0)
+  gsap.ticker.lagSmoothing(500, 33)
   let prev = performance.now()
   gsap.ticker.add((time) => {
     const now = performance.now()
