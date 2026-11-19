@@ -21,8 +21,8 @@ export function artVar(key: string, variant = 'landscape'): Variant {
 }
 
 export function pickWidth(widths: number[], need: number) {
-  const dpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 2)
-  const target = need * dpr
+  const dpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 1.5)
+  const target = Math.min(need * dpr, 2560)
   return widths.find((w) => w >= target) ?? widths[widths.length - 1]
 }
 

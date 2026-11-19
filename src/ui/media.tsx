@@ -21,7 +21,8 @@ type PicProps = {
 function Picture({ base, v, sizes = '100vw', alt, className, style, imgStyle, eager, priority, fit = 'cover', position = 'center', maxW, onLoad }: PicProps) {
   const [loaded, setLoaded] = useState(false)
   const ref = useRef<HTMLImageElement>(null)
-  const widths = maxW ? v.widths.filter((w) => w <= maxW) : v.widths
+  const maxAllowed = maxW ?? 2560
+  const widths = v.widths.filter((w) => w <= maxAllowed)
   const ws = widths.length ? widths : [v.widths[0]]
   const set = (ext: string) => ws.map((w) => `${base}-${w}.${ext} ${w}w`).join(', ')
   useEffect(() => {
