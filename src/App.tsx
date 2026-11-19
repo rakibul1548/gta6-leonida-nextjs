@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useRef, useState } from 'react'
 import { Boot } from './chapters/Boot'
 import { Hero } from './chapters/Hero'
@@ -23,7 +25,7 @@ import { detectQuality, refreshPixelRatio } from './gl/quality'
 import { sfx } from './audio/engine'
 import { SECRETS } from './content/world'
 
-const params = new URLSearchParams(location.search)
+const params = typeof location !== 'undefined' ? new URLSearchParams(location.search) : new URLSearchParams()
 const skipBoot = params.get('boot') === '0'
 
 export function App() {

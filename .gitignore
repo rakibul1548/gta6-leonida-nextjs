@@ -1,3 +1,4 @@
+.next/
 node_modules/
 dist/
 dist-ssr/
@@ -5,3 +6,5 @@ dist-ssr/
 .DS_Store
 tsconfig.tsbuildinfo
 *.log
+.vercel
+.env*
