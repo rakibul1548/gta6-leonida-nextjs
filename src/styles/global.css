@@ -69,6 +69,11 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
 html.is-booting body { overflow: hidden; }
+html.is-locked, body.is-locked {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+}
 
 img, video, canvas { display: block; max-width: 100%; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }

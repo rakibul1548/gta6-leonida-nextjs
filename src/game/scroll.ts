@@ -73,7 +73,17 @@ export function lockScroll(lock: boolean) {
     if (lock) lenis.stop()
     else lenis.start()
   }
-  document.documentElement.style.overflow = lock ? 'hidden' : ''
+  document.documentElement.classList.toggle('is-locked', lock)
+  document.body.classList.toggle('is-locked', lock)
+  if (lock) {
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+    document.body.style.touchAction = 'none'
+  } else {
+    document.documentElement.style.overflow = ''
+    document.body.style.overflow = ''
+    document.body.style.touchAction = ''
+  }
 }
 
 export function elTop(el: HTMLElement) {

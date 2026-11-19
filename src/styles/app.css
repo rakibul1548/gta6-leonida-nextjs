@@ -497,26 +497,68 @@ main { position: relative; }
 .lightbox__img picture { width: 100%; height: 100%; background-color: transparent !important; background-image: none !important; }
 .lightbox__bar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; padding: 16px var(--gutter) 22px; }
 .lightbox__bar > div { display: flex; gap: 8px; }
-.modal, .dossier { position: fixed; inset: 0; z-index: 91; display: grid; place-items: center; padding: 30px var(--gutter); animation: menuIn .35s var(--ease); }
-.modal__bg { position: absolute; inset: 0; background: rgba(8,6,13,.86); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
-.maker { position: relative; display: grid; grid-template-columns: auto minmax(280px, 400px); gap: 36px; align-items: center; max-height: 100%; }
+.modal, .dossier { position: fixed; inset: 0; z-index: 91; display: grid; place-items: center; padding: 30px var(--gutter); animation: menuIn .35s var(--ease); overscroll-behavior: contain; }
+.modal__bg { position: absolute; inset: 0; background: rgba(8,6,13,.86); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); touch-action: none; overscroll-behavior: none; }
+.maker { position: relative; display: grid; grid-template-columns: auto minmax(280px, 400px); gap: 36px; align-items: center; max-height: 100%; overscroll-behavior: contain; }
 .maker__preview { position: relative; height: min(78vh, 760px); background: #000; box-shadow: 0 40px 100px rgba(0,0,0,.7); display: grid; place-items: center; }
 .maker__preview--4x5 { aspect-ratio: 4/5; }
 .maker__preview--9x16 { aspect-ratio: 9/16; }
 .maker__preview img { width: 100%; height: 100%; object-fit: contain; }
-.maker__side { display: grid; gap: 14px; align-content: center; max-height: 86vh; overflow: auto; padding-right: 4px; }
+.maker__side { display: grid; gap: 14px; align-content: center; max-height: 86vh; overflow: auto; padding-right: 4px; overscroll-behavior: contain; }
 .maker__side p { margin: 0; }
 .maker__row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
 .cover-slot { position: absolute; border: 2px solid transparent; transition: border-color .2s, background .2s; }
 .cover-slot:hover { border-color: rgba(255,255,255,.8); background: rgba(255,255,255,.08); }
 .cover-slot.is-active { border-color: var(--accent); background: rgba(255,155,210,.15); }
-.cover-picker { max-height: 40vh; overflow: auto; }
+.cover-picker { max-height: 40vh; overflow: auto; overscroll-behavior: contain; }
 .cover-picker .gallery__grid { grid-template-columns: repeat(3, 1fr); }
 .cover-picker .gallery__filters { display: none; }
-.dossier { place-items: stretch end; padding: 0; }
-.dossier__sheet { position: relative; width: min(620px, 100vw); height: 100%; overflow-y: auto; background: #0c0815; border-left: 4px solid var(--c); animation: sheetIn .55s var(--ease); }
+.dossier { place-items: stretch end; padding: 0; overflow: hidden; overscroll-behavior: contain; }
+.dossier__sheet {
+  position: relative;
+  width: min(620px, 100vw);
+  height: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  background: #0c0815;
+  border-left: 4px solid var(--c);
+  animation: sheetIn .55s var(--ease);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.25) transparent;
+}
+.dossier__sheet::-webkit-scrollbar { width: 6px; }
+.dossier__sheet::-webkit-scrollbar-track { background: transparent; }
+.dossier__sheet::-webkit-scrollbar-thumb { background: rgba(255,255,255,.25); border-radius: 3px; }
+.dossier__close {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top, 0px));
+  right: max(16px, env(safe-area-inset-right, 0px));
+  z-index: 10;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(8,6,13,.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.25);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, transform .2s, border-color .2s;
+}
+.dossier__close:hover { background: rgba(255,255,255,.2); border-color: #fff; transform: scale(1.08); }
 @keyframes sheetIn { from { transform: translateX(60px); opacity: 0; } }
-.dossier__clip { aspect-ratio: 16/10; background: #000; }
+.dossier__clip { position: relative; aspect-ratio: 16/10; background: #000; overflow: hidden; }
+.dossier__clip video { pointer-events: none; }
 .dossier__body { padding: 30px 34px 50px; display: grid; gap: 16px; }
 .dossier__body p { margin: 0; }
 .dossier__shots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }

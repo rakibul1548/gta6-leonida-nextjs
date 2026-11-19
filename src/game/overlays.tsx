@@ -569,8 +569,11 @@ export function Dossier() {
     <div className="dossier" role="dialog" aria-modal="true" aria-label={`${c.first} ${c.last}`} ref={ref}>
       <div className="modal__bg" onClick={() => set({ dossier: null })} />
       <aside className="dossier__sheet" style={{ ['--c' as string]: c.color }}>
+        <button className="dossier__close" onClick={() => set({ dossier: null })} aria-label="Close dossier" data-cursor="CLOSE">
+          ✕
+        </button>
         <div className="dossier__clip">
-          <Clip k={c.clip} active need={1080} />
+          <Clip k={c.clip} active always need={1080} />
         </div>
         <div className="dossier__body">
           <span className="t-label" style={{ color: c.color }}>

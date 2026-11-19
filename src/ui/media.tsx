@@ -87,17 +87,21 @@ export function Clip({ k, active, className, style, need = 720, fit = 'cover', p
   const [src, setSrc] = useState<string | null>(null)
   const reduced = useGame((s) => s.reduced)
   const slowmo = useGame((s) => s.slowmo)
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(() => !!active || !!always)
 
   useEffect(() => {
+    if (active || always) {
+      setVisible(true)
+      return
+    }
     const el = ref.current
     if (!el) return
     const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: '200px' })
     io.observe(el)
     return () => io.disconnect()
-  }, [])
+  }, [active, always])
 
-  const shouldPlay = (active || always) && visible && !reduced
+  const shouldPlay = (active || always || visible) && !reduced
 
   useEffect(() => {
     if (shouldPlay && !src) setSrc(clipUrl(k, need))
