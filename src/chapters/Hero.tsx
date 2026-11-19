@@ -69,7 +69,13 @@ export function Hero() {
   const [glReady, setGlReady] = useState(false)
   const glLost = useGame((s) => s.glLost)
   const useGL = !reduced && quality !== 'low' && !glLost
-  const phone = typeof window !== 'undefined' && window.innerWidth / window.innerHeight < 0.8
+  const [phone, setPhone] = useState(() => typeof window !== 'undefined' && window.innerWidth / window.innerHeight < 0.8)
+
+  useEffect(() => {
+    const onResize = () => setPhone(window.innerWidth / window.innerHeight < 0.8)
+    window.addEventListener('resize', onResize, { passive: true })
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
   const scene = dial < 0.34 ? 0 : dial < 0.67 ? 1 : 2
   const sceneRef = useRef(scene)
   sceneRef.current = scene

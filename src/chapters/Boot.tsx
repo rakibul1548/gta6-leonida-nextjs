@@ -29,7 +29,13 @@ export function Boot({ onEnter }: { onEnter: (sound: boolean) => void }) {
   const [total, setTotal] = useState(1)
   const [tip, setTip] = useState(0)
   const [leaving, setLeaving] = useState(false)
-  const phone = typeof window !== 'undefined' && window.innerWidth / window.innerHeight < 0.8
+  const [phone, setPhone] = useState(() => typeof window !== 'undefined' && window.innerWidth / window.innerHeight < 0.8)
+
+  useEffect(() => {
+    const onResize = () => setPhone(window.innerWidth / window.innerHeight < 0.8)
+    window.addEventListener('resize', onResize, { passive: true })
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   useEffect(() => {
     const urls = [
