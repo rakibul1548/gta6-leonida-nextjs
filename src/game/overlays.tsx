@@ -559,6 +559,17 @@ function CoverMaker() {
   )
 }
 
+const CAST_FOCUS: Record<string, string> = {
+  'cal-hampton': '50% 22%',
+  'boobie-ike': '50% 22%',
+  'jason-duval': '48% 45%',
+  'lucia-caminos': '55% 40%',
+  'drequan-priest': '50% 25%',
+  'real-dimez': '50% 25%',
+  'raul-bautista': '50% 25%',
+  'brian-heder': '50% 22%',
+}
+
 export function Dossier() {
   const id = useGame((s) => s.dossier) as CastId | null
   const ref = useRef<HTMLDivElement>(null)
@@ -566,13 +577,17 @@ export function Dossier() {
   useTrap(!!id, ref)
 
   useEffect(() => {
-    const el = sheetRef.current
-    if (!el) return
+    const sheet = sheetRef.current
+    const modal = ref.current
+    if (!sheet || !modal) return
     const onWheel = (e: WheelEvent) => {
       e.stopPropagation()
+      if (!sheet.contains(e.target as Node)) {
+        sheet.scrollTop += e.deltaY
+      }
     }
-    el.addEventListener('wheel', onWheel, { passive: true })
-    return () => el.removeEventListener('wheel', onWheel)
+    modal.addEventListener('wheel', onWheel, { passive: true })
+    return () => modal.removeEventListener('wheel', onWheel)
   }, [id])
 
   if (!id) return null
@@ -597,7 +612,7 @@ export function Dossier() {
           ✕
         </button>
         <div className="dossier__clip">
-          <Clip k={c.clip} active always need={1080} />
+          <Clip k={c.clip} active always need={720} position={CAST_FOCUS[c.id] ?? '50% 30%'} />
         </div>
         <div className="dossier__body">
           <span className="t-label" style={{ color: c.color }}>

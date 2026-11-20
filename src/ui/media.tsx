@@ -83,9 +83,30 @@ export function ShotImg(props: Omit<PicProps, 'base' | 'v'> & { id: string }) {
   return <Picture base={shotBase(id)} v={s} {...rest} />
 }
 
-export function Clip({ k, active, className, style, need = 720, fit = 'cover', position = 'center', rate = 1, always = false }: { k: string; active: boolean; className?: string; style?: CSSProperties; need?: number; fit?: 'cover' | 'contain'; position?: string; rate?: number; always?: boolean }) {
+export function Clip({
+  k,
+  active,
+  className,
+  style,
+  need = 720,
+  fit = 'cover',
+  position = 'center',
+  rate = 1,
+  always = false,
+}: {
+  k: string
+  active: boolean
+  className?: string
+  style?: CSSProperties
+  need?: number
+  fit?: 'cover' | 'contain'
+  position?: string
+  rate?: number
+  always?: boolean
+}) {
   const ref = useRef<HTMLVideoElement>(null)
   const [src, setSrc] = useState<string | null>(null)
+  const [videoReady, setVideoReady] = useState(false)
   const reduced = useGame((s) => s.reduced)
   const slowmo = useGame((s) => s.slowmo)
   const [intersecting, setIntersecting] = useState(() => !!always)
@@ -118,19 +139,64 @@ export function Clip({ k, active, className, style, need = 720, fit = 'cover', p
     } else el.pause()
   }, [shouldPlay, src, rate, slowmo])
 
+  const poster = clipPoster(k)
+
   return (
-    <video
-      ref={ref}
+    <div
       className={className}
-      style={{ width: '100%', height: '100%', objectFit: fit, objectPosition: position, display: 'block', ...style }}
-      poster={clipPoster(k)}
-      src={src ?? undefined}
-      muted
-      loop
-      playsInline
-      preload={shouldPlay ? 'auto' : 'none'}
-      aria-hidden="true"
-      disablePictureInPicture
-    />
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        backgroundColor: '#0c0815',
+        ...style,
+      }}
+    >
+      <img
+        src={poster}
+        alt=""
+        loading="eager"
+        decoding="async"
+        draggable={false}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: fit,
+          objectPosition: position,
+          opacity: videoReady ? 0 : 1,
+          transition: 'opacity .4s ease',
+          pointerEvents: 'none',
+        }}
+      />
+      <video
+        ref={ref}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload={shouldPlay ? 'auto' : 'none'}
+        poster={poster}
+        src={src ?? undefined}
+        onLoadedData={() => setVideoReady(true)}
+        onPlaying={() => setVideoReady(true)}
+        aria-hidden="true"
+        disablePictureInPicture
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: fit,
+          objectPosition: position,
+          opacity: videoReady ? 1 : 0,
+          transition: 'opacity .4s ease',
+          display: 'block',
+          pointerEvents: 'none',
+        }}
+      />
+    </div>
   )
 }

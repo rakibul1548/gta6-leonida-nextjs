@@ -76,6 +76,8 @@ export function Boot({ onEnter }: { onEnter: (sound: boolean) => void }) {
 
   useEffect(() => {
     if (!root.current) return
+    const isReduced = typeof window !== 'undefined' && (get().reduced || window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    if (isReduced) return
     const ctx = gsap.context(() => {
       if (!STATIC) gsap.from('.boot__panel picture', { scale: 1.18, filter: 'brightness(2) saturate(0.4)', duration: 1.6, ease: 'expo.out', stagger: 0.09 })
       if (!STATIC) gsap.from('.boot__panel', { clipPath: 'inset(0 0 38% 0)', duration: 1.1, ease: 'expo.out', stagger: 0.08 })
