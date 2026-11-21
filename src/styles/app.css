@@ -238,6 +238,10 @@ main { position: relative; }
 .tile--cover { padding: 0; display: block; background: #0b0716; }
 .tile--cover picture, .tile--cover img, .tile--cover .tile__img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .saga__foot { display: grid; justify-items: center; gap: 18px; text-align: center; margin-top: 10px; }
+.saga__interactive { position: relative; margin: 30px auto 14px; display: flex; justify-content: center; }
+.saga__info { display: grid; gap: 6px; text-align: center; justify-items: center; }
+.saga__title { font: 400 clamp(22px, 3.2vw, 32px)/1.2 var(--f-display); text-transform: uppercase; letter-spacing: 0.04em; color: var(--gold); }
+.saga__hint { font: 600 11px/1 var(--f-text); letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.45); margin-top: 4px; }
 .saga__meta { display: grid; gap: 8px; }
 .saga__meta b { font-weight: 400; }
 .saga__meta i { color: var(--accent); font-style: normal; }
