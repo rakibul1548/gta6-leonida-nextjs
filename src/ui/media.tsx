@@ -126,8 +126,12 @@ export function Clip({
   const shouldPlay = (always || (active && intersecting)) && !reduced
 
   useEffect(() => {
-    if (shouldPlay && !src) setSrc(clipUrl(k, need))
-  }, [shouldPlay, src, k, need])
+    if (shouldPlay) {
+      setSrc(clipUrl(k, need))
+    } else {
+      setVideoReady(false)
+    }
+  }, [shouldPlay, k, need])
 
   useEffect(() => {
     const el = ref.current
@@ -135,7 +139,17 @@ export function Clip({
     el.playbackRate = rate * (slowmo ? 0.5 : 1)
     if (shouldPlay) {
       const p = el.play()
-      if (p) p.catch(() => {})
+      if (p) {
+        p.catch(() => {
+          const retry = () => {
+            el.play().catch(() => {})
+            window.removeEventListener('click', retry)
+            window.removeEventListener('touchstart', retry)
+          }
+          window.addEventListener('click', retry, { once: true })
+          window.addEventListener('touchstart', retry, { once: true })
+        })
+      }
     } else el.pause()
   }, [shouldPlay, src, rate, slowmo])
 
@@ -166,8 +180,7 @@ export function Clip({
           height: '100%',
           objectFit: fit,
           objectPosition: position,
-          opacity: videoReady ? 0 : 1,
-          transition: 'opacity .4s ease',
+          opacity: 1,
           pointerEvents: 'none',
         }}
       />
@@ -180,8 +193,13 @@ export function Clip({
         preload={shouldPlay ? 'auto' : 'none'}
         poster={poster}
         src={src ?? undefined}
-        onLoadedData={() => setVideoReady(true)}
-        onPlaying={() => setVideoReady(true)}
+        onTimeUpdate={(e) => {
+          const v = e.currentTarget
+          if (!v.paused && v.currentTime > 0.08) setVideoReady(true)
+        }}
+        onPlaying={(e) => {
+          if (e.currentTarget.currentTime > 0.08) setVideoReady(true)
+        }}
         aria-hidden="true"
         disablePictureInPicture
         style={{

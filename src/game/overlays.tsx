@@ -580,14 +580,31 @@ export function Dossier() {
     const sheet = sheetRef.current
     const modal = ref.current
     if (!sheet || !modal) return
+
     const onWheel = (e: WheelEvent) => {
+      sheet.scrollTop += e.deltaY
+      e.preventDefault()
       e.stopPropagation()
-      if (!sheet.contains(e.target as Node)) {
-        sheet.scrollTop += e.deltaY
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        sheet.scrollTop += 80
+      } else if (e.key === 'ArrowUp') {
+        sheet.scrollTop -= 80
+      } else if (e.key === 'PageDown') {
+        sheet.scrollTop += 320
+      } else if (e.key === 'PageUp') {
+        sheet.scrollTop -= 320
       }
     }
-    modal.addEventListener('wheel', onWheel, { passive: true })
-    return () => modal.removeEventListener('wheel', onWheel)
+
+    modal.addEventListener('wheel', onWheel, { passive: false })
+    window.addEventListener('keydown', onKey)
+    return () => {
+      modal.removeEventListener('wheel', onWheel)
+      window.removeEventListener('keydown', onKey)
+    }
   }, [id])
 
   if (!id) return null
@@ -602,17 +619,33 @@ export function Dossier() {
         data-lenis-prevent
         data-lenis-prevent-wheel
         data-lenis-prevent-touch
-        onWheel={(e) => {
-          e.stopPropagation()
-          e.nativeEvent?.stopImmediatePropagation?.()
-        }}
         style={{ ['--c' as string]: c.color }}
       >
         <button className="dossier__close" onClick={() => set({ dossier: null })} aria-label="Close dossier" data-cursor="CLOSE">
           ✕
         </button>
         <div className="dossier__clip">
-          <Clip k={c.clip} active always need={720} position={CAST_FOCUS[c.id] ?? '50% 30%'} />
+          <Art
+            k={c.art}
+            variant="portrait"
+            alt={`${c.first} ${c.last}`}
+            sizes="(max-width: 760px) 100vw, 620px"
+            maxW={1080}
+            position={CAST_FOCUS[c.id] ?? '50% 25%'}
+            eager
+            priority
+            className="dossier__art"
+          />
+          <Clip
+            k={c.clip}
+            active
+            always
+            need={720}
+            position={CAST_FOCUS[c.id] ?? '50% 25%'}
+            className="dossier__video"
+          />
+          <div className="dossier__clip-overlay" />
+          <span className="dossier__badge live-badge">● Official Record</span>
         </div>
         <div className="dossier__body">
           <span className="t-label" style={{ color: c.color }}>
