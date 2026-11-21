@@ -27,12 +27,12 @@ export function Saga() {
   const isMobile = size.width < 640
   const isTablet = size.width >= 640 && size.width < 1024
 
-  const containerWidth = isMobile ? Math.min(370, size.width - 24) : isTablet ? Math.min(680, size.width - 40) : 840
-  const containerHeight = isMobile ? 260 : isTablet ? 320 : 360
-  const cardSize = isMobile ? 110 : isTablet ? 150 : 190
-  const spread = isMobile ? 32 : isTablet ? 54 : 76
-  const pushDistance = isMobile ? 65 : isTablet ? 110 : 150
-  const rotation = isMobile ? 8 : 12
+  const containerWidth = isMobile ? Math.min(420, size.width - 16) : isTablet ? Math.min(780, size.width - 32) : Math.min(1020, size.width - 48)
+  const containerHeight = isMobile ? 320 : isTablet ? 390 : 460
+  const cardSize = isMobile ? 140 : isTablet ? 195 : 255
+  const spread = isMobile ? 38 : isTablet ? 65 : 92
+  const pushDistance = isMobile ? 75 : isTablet ? 130 : 180
+  const rotation = isMobile ? 8 : 11
   const arc = isMobile ? -8 : -16
 
   const cards = useMemo(
@@ -104,9 +104,9 @@ export function Saga() {
           bounciness={0.65}
           animationDelay={0.3}
           animationStagger={0.06}
-          borderWidth={isMobile ? 3 : 4}
+          borderWidth={isMobile ? 3.5 : 5}
           borderColor="#ffffff"
-          radius={isMobile ? 14 : 20}
+          radius={isMobile ? 16 : 24}
           shadow
           enableHover
           selectedIndex={selectedIndex}
