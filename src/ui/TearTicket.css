@@ -1,18 +1,18 @@
 .tear-ticket {
-  --tt-w: 460px;
-  --tt-h: 250px;
-  --tt-stub: 150px;
-  --tt-bg: #27272a;
-  --tt-stub-bg: #27272a;
+  --tt-w: 540px;
+  --tt-h: 270px;
+  --tt-stub: 165px;
+  --tt-bg: #140e1d;
+  --tt-stub-bg: #140e1d;
   --tt-ink: #f5f5f5;
-  --tt-edge: transparent;
-  --tt-edge-w: 1px;
-  --tt-parallax: 6px;
-  --tt-body-w: 310px;
-  --tt-body-h: 250px;
+  --tt-edge: #ff4fa3;
+  --tt-edge-w: 1.5px;
+  --tt-parallax: 8px;
+  --tt-body-w: 375px;
+  --tt-body-h: 270px;
   --tt-inset: 8px;
   --tt-span: 0.78;
-  --tt-art-radius: 8px;
+  --tt-art-radius: 10px;
   --tt-fit: 1;
 
   position: relative;
@@ -38,6 +38,7 @@
   transform: scale(var(--tt-fit));
   transform-origin: top left;
   transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 25px color-mix(in srgb, var(--tt-edge) 30%, transparent));
 }
 
 .tear-ticket[data-shift='x'] .tear-ticket__stage {
@@ -77,19 +78,27 @@
   fill: none;
   stroke: var(--tt-edge);
   stroke-width: var(--tt-edge-w);
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--tt-edge) 60%, transparent));
 }
 
 .tear-ticket__paper {
   position: absolute;
   inset: 0;
-  background: var(--tt-bg);
+  background-color: var(--tt-bg);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 8px 8px;
   pointer-events: auto;
 }
 
 .tear-ticket__paper--stub {
-  background: var(--tt-stub-bg);
+  background-color: var(--tt-stub-bg);
   cursor: grab;
   touch-action: none;
+  transition: filter 0.25s ease;
+}
+
+.tear-ticket__paper--stub:hover {
+  filter: brightness(1.12);
 }
 
 .tear-ticket[data-grabbing] .tear-ticket__paper--stub {
@@ -123,7 +132,7 @@
 }
 
 .tear-ticket[data-used] .tear-ticket__image {
-  filter: grayscale(1) brightness(0.75);
+  filter: grayscale(1) brightness(0.7);
 }
 
 .tear-ticket__scrim {
@@ -132,9 +141,9 @@
   background: linear-gradient(
     to top,
     var(--tt-bg) 0%,
-    color-mix(in srgb, var(--tt-bg) 72%, transparent) 30%,
-    color-mix(in srgb, var(--tt-bg) 18%, transparent) 58%,
-    transparent 80%
+    color-mix(in srgb, var(--tt-bg) 75%, transparent) 30%,
+    color-mix(in srgb, var(--tt-bg) 20%, transparent) 60%,
+    transparent 85%
   );
 }
 
@@ -189,8 +198,9 @@
 
 .tear-ticket__fibres path {
   fill: none;
-  stroke: var(--tt-bg);
+  stroke: var(--tt-edge);
   stroke-linecap: round;
+  filter: drop-shadow(0 0 3px var(--tt-edge));
   opacity: 0;
 }
 
