@@ -256,6 +256,7 @@ export function Story() {
               borderColor={ticket.accent}
               recenter
               torn={isTorn}
+              defaultTorn={isTorn}
               onTear={handleTear}
               stub={
                 <div className="story-stub">

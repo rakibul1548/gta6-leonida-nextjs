@@ -65,6 +65,17 @@
   will-change: transform;
 }
 
+.tear-ticket[data-used] .tear-ticket__piece--stub {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.tear-ticket[data-used] .tear-ticket__fibres {
+  display: none !important;
+}
+
 .tear-ticket__edge {
   position: absolute;
   inset: 0;

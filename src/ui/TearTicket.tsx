@@ -347,7 +347,11 @@ export default function TearTicket({
 
   const finish = () => {
     const c = cfg.current
-    if (stubRef.current) stubRef.current.style.visibility = 'hidden'
+    if (stubRef.current) {
+      stubRef.current.style.visibility = 'hidden'
+      stubRef.current.style.opacity = '0'
+      stubRef.current.style.display = 'none'
+    }
     if (!c.controlled) setInner(true)
     c.onTear?.()
   }
@@ -443,9 +447,10 @@ export default function TearTicket({
     s.raf = requestAnimationFrame(step)
   }
 
-  const reset = () => {
+  const reset = (force = false) => {
     const s = sim.current
     cancelAnimationFrame(s.raf)
+    const shouldHide = used && !force
     Object.assign(s, {
       raf: 0,
       phase: 'idle',
@@ -454,7 +459,7 @@ export default function TearTicket({
       thetaV: 0,
       sx: 0,
       sy: 0,
-      fade: 1,
+      fade: shouldHide ? 0 : 1,
       age: 0,
       bx: 0,
       bv: 0,
@@ -462,23 +467,35 @@ export default function TearTicket({
     s.snapped = []
     s.snapAt = []
     s.span = []
-    if (stubRef.current) stubRef.current.style.visibility = ''
+    if (stubRef.current) {
+      stubRef.current.style.visibility = shouldHide ? 'hidden' : ''
+      stubRef.current.style.opacity = shouldHide ? '0' : '1'
+      stubRef.current.style.display = shouldHide ? 'none' : ''
+    }
     paint(performance.now())
   }
 
   useEffect(() => {
     if (used) {
       const s = sim.current
-      if (s.phase === 'idle' && stubRef.current) stubRef.current.style.visibility = 'hidden'
+      s.phase = 'idle'
+      s.fade = 0
+      if (stubRef.current) {
+        stubRef.current.style.visibility = 'hidden'
+        stubRef.current.style.opacity = '0'
+        stubRef.current.style.display = 'none'
+      }
       return
     }
     setInstant(false)
-    reset()
+    reset(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [used])
 
   useEffect(() => {
-    reset()
+    if (!used) {
+      reset()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geo])
 
@@ -666,6 +683,7 @@ export default function TearTicket({
           <div
             ref={stubRef}
             className="tear-ticket__piece tear-ticket__piece--stub"
+            style={used ? { display: 'none', visibility: 'hidden', opacity: 0, pointerEvents: 'none' } : undefined}
             role="button"
             tabIndex={disabled || used ? -1 : 0}
             aria-label={ariaLabel}
